@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const passport = require('passport');
@@ -12,10 +13,9 @@ app.use(cors());
 app.use(passport.initialize());
 
 app.get('/', (req, res) => {
-    return res.json({ message: 'Welcome to my API' });
+    return res.json({ message: 'Welcome to RxReminder API' });
 });
 
-app.use('/medications', require('./controllers/medications'));
 app.use('/users', require('./controllers/users'));
 
 const PORT = process.env.PORT || 8000;

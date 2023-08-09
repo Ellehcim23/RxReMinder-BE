@@ -3,9 +3,7 @@ const mongoose = require('mongoose');
 
 // import all models
 const User = require('./user');
-const Medication = require('./medication');
-const Dose = require('./dose');
-const Prescription = require('./prescription');
+
 
 console.log('mongo uri =>', process.env.MONGO_URI);
 
@@ -30,7 +28,7 @@ db.on('error', (err) => {
 
 module.exports = {
     User,
-    Prescription,
-    Medication,
-    Dose
+    Post,
+    Product,
+    Order
 };

@@ -9,3 +9,6 @@ const medicationSchema = new mongoose.Schema({
 const Medication = mongoose.model('Medication', medicationSchema);
 
 module.exports = Medication;
+
+// export the model to be used
+module.exports = medication;
