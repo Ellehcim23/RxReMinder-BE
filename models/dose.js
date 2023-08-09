@@ -6,8 +6,8 @@ const doseSchema = new mongoose.Schema({
     prescription: { type: mongoose.Schema.Types.ObjectId, ref: 'Prescription' },
     medication: { type: mongoose.Schema.Types.ObjectId, ref: 'Medication' },
     time: Date,
-    taken: Boolean,
-    notified: Boolean,
+    taken: { type: Boolean, default: 'false' },
+    notified: { type: Boolean, default: 'false' },
 }, { timestamps: true });
 
 // create model
