@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const User = require('./user');
 const Medication = require('./medication');
 const Prescription = require('./prescription');
+const Dose = require('./dose');
 
 // connect to the database
 mongoose.connect(process.env.MONGO_URI, {
@@ -29,4 +30,5 @@ module.exports = {
     User,
     Medication,
     Prescription,
+    Dose,
 }
