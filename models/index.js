@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 
 // import all models
 const User = require('./user');
-
-
-console.log('mongo uri =>', process.env.MONGO_URI);
+const Medication = require('./medication');
+const Prescription = require('./prescription');
+const Dose = require('./dose');
 
 // connect to the database
 mongoose.connect(process.env.MONGO_URI, {
@@ -28,5 +28,7 @@ db.on('error', (err) => {
 
 module.exports = {
     User,
-   
+    Medication,
+    Prescription,
+    Dose,
 }
