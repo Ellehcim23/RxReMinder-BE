@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST a new dose
-router.post('/doses', async (req, res) => {
+router.post('/new', async (req, res) => {
     try {
         const newDose = new Dose(req.body);
         const savedDose = await newDose.save();
@@ -37,7 +37,7 @@ router.post('/doses', async (req, res) => {
 });
 
 // PUT/update a dose
-router.put('/doses/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const updatedDose = await Dose.findByIdAndUpdate(req.params.id, req.body, { new: true });
         // res.header("Access-Control-Allow-Origin", "*");
@@ -49,7 +49,7 @@ router.put('/doses/:id', async (req, res) => {
 });
 
 // DELETE a dose
-router.delete('/doses/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
         const deletedDose = await Dose.findByIdAndDelete(req.params.id);
         // res.header("Access-Control-Allow-Origin", "*");
