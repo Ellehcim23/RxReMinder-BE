@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const { JWT_SECRET } = process.env;
+const moment = require('moment');
 
 // import the User model
 const { User } = require('../models');
@@ -27,44 +28,36 @@ router.get('/', (req, res) => {
 
 // private
 router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
-    console.log('====> inside /profile');
     console.log(req.body);
-    console.log('====> user')
     console.log(req.user);
-    const { id, firstName, lastName, email, address, jobTitle, birthdate, number } = req.user; // object with user object inside
-    res.json({ id, firstName, lastName, email, address, jobTitle, birthdate, number });
+    const { id, firstName, lastName, email, weight, height, address, username, birthdate, phoneNumber, prescriptions } = req.user; // object with user object inside
+    birthdate = moment(birthdate).format('MMMM Do YYYY');
+    res.json({ id, firstName, lastName, email, weight, height, address, username, birthdate, phoneNumber, prescriptions });
 });
 
 // other routes below
-// GET make a route that queries users by [email domain] [zipCode] [state]
+// GET make a route that queries users by a field and value
 router.get('/:field/:value', (req, res) => {
-    if (req.params.field === 'zipcode' || req.params.field === 'zipCode') {
-        let zipCode = parseInt(req.params.value);
-        // find all users based on zipCode
-        User.find({ "address.zipCode": zipCode })
-            .then((users) => {
-                console.log('users', users);
-                res.header("Access-Control-Allow-Origin", "*");
-                return res.json({ users: users });
-            })
-            .catch((error) => {
-                console.log('error', error);
-                res.header("Access-Control-Allow-Origin", "*");
-                res.json({ message: 'There was an issue, please try again...' });
-            });
-    } else if (req.params.field === 'email' || req.params.field === 'Email') {
-        User.find({ email: req.params.value })
-            .then((user) => {
-                console.log('user', user);
-                res.header("Access-Control-Allow-Origin", "*");
-                return res.json({ user: user });
-            })
-            .catch((error) => {
-                console.log('error', error);
-                res.header("Access-Control-Allow-Origin", "*");
-                res.json({ message: 'There was an issue, please try again...' });
-            });
-    }
+    let field = req.params.field;
+    let value = req.params.value;
+    // console.log('field', 'value', field, value);
+    
+    User.find({ [field]:[value] })
+    .then((users) => {
+        // console.log("user", user);
+
+        let birthdateParsedUsers = users.map(user => {
+            let parsedUser = {...user._doc};
+            parsedUser.birthdate = moment(user.birthdate).format('MMMM Do YYYY');
+            // console.log(parsedUser);
+            return parsedUser;
+        });
+        return res.json({ users: birthdateParsedUsers });
+    })
+    .catch(error => {
+        console.log('error', error);
+        return res.json({ message: 'There was an issue please try again...' });
+    });
 });
 
 router.post('/signup', (req, res) => {
@@ -84,13 +77,12 @@ router.post('/signup', (req, res) => {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 email: req.body.email,
-                jobTitle: req.body.jobTitle,
+                username: req.body.username,
                 birthdate: new Date(),
-                "address.streetAddress": req.body.streetAddress,
-                "address.city": req.body.city,
-                "address.state": req.body.state,
-                "address.zipCode": req.body.zipCode,
-                number: req.body.number,
+                height: req.body.height,
+                weight: req.body.weight,
+                prescriptions: req.body.prescriptions,
+                phoneNumber: req.body.phoneNumber,
                 password: req.body.password
             });
 
@@ -145,10 +137,12 @@ router.post('/login', async (req, res) => {
                 email: foundUser.email,
                 firstName: foundUser.firstName,
                 lastName: foundUser.lastName,
-                address: foundUser.address,
-                birthdate: foundUser.birthdate,
-                jobTitle: foundUser.jobTitle,
-                number: foundUser.number
+                birthdate: moment(foundUser.birthdate).format('MMMM Do YYYY'),
+                username: foundUser.username,
+                phoneNumber: foundUser.phoneNumber,
+                prescriptions: foundUser.prescriptions,
+                weight: foundUser.weight,
+                height: foundUser.height,
             }
 
             jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
@@ -169,52 +163,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// POST route /users/new - create a new user
-router.post('/new', (req, res) => {
-    // read the req.body - data for the new user coming in at
-    console.log('data from request (user)', req.body); // object
-    // Find a user
-    User.findOne({ email: req.body.email })
-        .then((user) => {
-            // check to see if user exist in database
-            if (user) {
-                // return a message saying user exist
-                res.header("Access-Control-Allow-Origin", "*");
-                res.json({ message: `${user.email} already exists. Please try again` });
-            } else {
-                // create a user
-                User.create({
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    email: req.body.email,
-                    jobTitle: req.body.jobTitle,
-                    birthdate: new Date(),
-                    "address.streetAddress": req.body.streetAddress,
-                    "address.city": req.body.city,
-                    "address.state": req.body.state,
-                    "address.zipCode": req.body.zipCode,
-                    number: req.body.number,
-                    password: req.body.password
-                })
-                    .then((newUser) => {
-                        console.log('new user created ->', newUser);
-                        res.header("Access-Control-Allow-Origin", "*");
-                        return res.json({ user: newUser });
-                    })
-                    .catch((error) => {
-                        console.log('error', error);
-                        res.header("Access-Control-Allow-Origin", "*");
-                        return res.json({ message: 'error occured, please try again.' });
-                    });
-            }
-        })
-        .catch((error) => {
-            console.log('error', error);
-            res.header("Access-Control-Allow-Origin", "*");
-            return res.json({ message: 'error occured, please try again.' });
-        });
-});
-
 router.put('/:id', (req, res) => {
     const updateQuery = {}
     // check firstName
@@ -229,33 +177,29 @@ router.put('/:id', (req, res) => {
     if (req.body.email) {
         updateQuery.email = req.body.email
     }
-    // check jobTitle
-    if (req.body.jobTitle) {
-        updateQuery.jobTitle = req.body.jobTitle
+    // check username
+    if (req.body.username) {
+        updateQuery.username = req.body.username
     }
-    // check bithdate
-    if (req.body.bithdate) {
-        updateQuery.bithdate = req.body.bithdate
+    // check birthdate
+    if (req.body.birthdate) {
+        updateQuery.birthdate = req.body.birthdate
     }
-    // check streetAddress
-    if (req.body.streetAddress) {
-        updateQuery["address.streetAddress"] = req.body.streetAddress
+    // check height
+    if (req.body.height) {
+        updateQuery.height = req.body.height
     }
-    // check city
-    if (req.body.city) {
-        updateQuery["address.city"] = req.body.city
+    // check weight
+    if (req.body.weight) {
+        updateQuery.weight = req.body.weight
     }
-    // check state
-    if (req.body.state) {
-        updateQuery["address.state"] = req.body.state
+    // check prescriptions
+    if (req.body.prescriptions) {
+        updateQuery.prescriptions = req.body.prescriptions
     }
-    // check zipCode
-    if (req.body.zipCode) {
-        updateQuery["address.zipCode"]  = req.body.zipCode
-    }
-    // check number
-    if (req.body.number) {
-        updateQuery.number = req.body.number
+    // check phoneNumber
+    if (req.body.phoneNumber) {
+        updateQuery.phoneNumber = req.body.phoneNumber
     }
 
     User.findByIdAndUpdate(req.params.id, {$set: updateQuery }, {new: true})
