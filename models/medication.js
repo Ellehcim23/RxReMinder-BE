@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// create the medication schema
+// the subdocuments get created first - embedded document
 const medicationSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
     category: String,
