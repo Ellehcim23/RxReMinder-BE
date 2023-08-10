@@ -15,7 +15,7 @@ const { User } = require('../models');
 router.get('/', (req, res) => {
     User.find({})
         .then((users) => {
-            console.log('users', users);
+            // console.log('users', users);
             res.header("Access-Control-Allow-Origin", "*");
             res.json({ users: users });
         })
@@ -28,11 +28,11 @@ router.get('/', (req, res) => {
 
 // private
 router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
-    console.log(req.body);
-    console.log(req.user);
-    const { id, firstName, lastName, email, weight, height, address, username, birthdate, phoneNumber, prescriptions } = req.user; // object with user object inside
+    // console.log(req.body);
+    // console.log(req.user);
+    const { id, firstName, lastName, email, username, birthdate, phoneNumber, prescriptions } = req.user; // object with user object inside
     birthdate = moment(birthdate).format('MMMM Do YYYY');
-    res.json({ id, firstName, lastName, email, weight, height, address, username, birthdate, phoneNumber, prescriptions });
+    res.json({ id, firstName, lastName, email, username, birthdate, phoneNumber, prescriptions });
 });
 
 // other routes below
@@ -62,8 +62,8 @@ router.get('/:field/:value', (req, res) => {
 
 router.post('/signup', (req, res) => {
     // POST - adding the new user to the database
-    console.log('===> Inside of /signup');
-    console.log('===> /register -> req.body',req.body);
+    // console.log('===> Inside of /signup');
+    // console.log('===> /register -> req.body',req.body);
 
     User.findOne({ email: req.body.email })
     .then(user => {
@@ -77,11 +77,7 @@ router.post('/signup', (req, res) => {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 email: req.body.email,
-                username: req.body.username,
-                birthdate: new Date(),
-                height: req.body.height,
-                weight: req.body.weight,
-                prescriptions: req.body.prescriptions,
+                birthdate: req.body.birthdate,
                 phoneNumber: req.body.phoneNumber,
                 password: req.body.password
             });
@@ -118,8 +114,8 @@ router.post('/signup', (req, res) => {
 
 router.post('/login', async (req, res) => {
     // POST - finding a user and returning the user
-    console.log('===> Inside of /login');
-    console.log('===> /login -> req.body', req.body);
+    // console.log('===> Inside of /login');
+    // console.log('===> /login -> req.body', req.body);
 
     const foundUser = await User.findOne({ email: req.body.email });
 
@@ -138,11 +134,8 @@ router.post('/login', async (req, res) => {
                 firstName: foundUser.firstName,
                 lastName: foundUser.lastName,
                 birthdate: moment(foundUser.birthdate).format('MMMM Do YYYY'),
-                username: foundUser.username,
                 phoneNumber: foundUser.phoneNumber,
                 prescriptions: foundUser.prescriptions,
-                weight: foundUser.weight,
-                height: foundUser.height,
             }
 
             jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
@@ -177,25 +170,9 @@ router.put('/:id', (req, res) => {
     if (req.body.email) {
         updateQuery.email = req.body.email
     }
-    // check username
-    if (req.body.username) {
-        updateQuery.username = req.body.username
-    }
     // check birthdate
     if (req.body.birthdate) {
         updateQuery.birthdate = req.body.birthdate
-    }
-    // check height
-    if (req.body.height) {
-        updateQuery.height = req.body.height
-    }
-    // check weight
-    if (req.body.weight) {
-        updateQuery.weight = req.body.weight
-    }
-    // check prescriptions
-    if (req.body.prescriptions) {
-        updateQuery.prescriptions = req.body.prescriptions
     }
     // check phoneNumber
     if (req.body.phoneNumber) {
