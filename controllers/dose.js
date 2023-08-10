@@ -11,7 +11,7 @@ const { Dose } = require('../models/');
 // middleware to protect all routes
 // router.use(passport.authenticate('jwt', { session: false }));
 
-// GET make a dose route to get all dose
+// GET make a dose route to get all dose http://localhost:8000/doses
 router.get('/', async (req, res) => {
     try {
         const doses = await Dose.find();
@@ -23,7 +23,21 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST a new dose
+// GET a specific doses by ID http://localhost:8000/doses/:id
+router.get('/:id', async (req, res) => {
+    try {
+        const dose = await Dose.findById(req.params.id);
+        if (!dose) {
+            res.status(404).json({ message: 'Dose not found' });
+        } else {
+            res.status(200).json(dose);
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching dose', error });
+    }
+});
+
+// POST a new dose http://localhost:8000/doses/new
 router.post('/new', async (req, res) => {
     try {
         const newDose = new Dose(req.body);
@@ -36,7 +50,7 @@ router.post('/new', async (req, res) => {
     }
 });
 
-// PUT/update a dose
+// PUT/update a dose http://localhost:8000/doses/:id
 router.put('/:id', async (req, res) => {
     try {
         const updatedDose = await Dose.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -48,7 +62,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE a dose
+// DELETE a dose http://localhost:8000/doses/:id
 router.delete('/:id', async (req, res) => {
     try {
         const deletedDose = await Dose.findByIdAndDelete(req.params.id);
