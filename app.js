@@ -18,7 +18,8 @@ app.get('/', (req, res) => {
 
 app.use('/users', require('./controllers/users'));
 app.use('/doses', require('./controllers/dose'));
-
+app.use('/medications', require('./controllers/medications'));
+app.use('/prescriptions', require('./controllers/prescriptions'));
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
