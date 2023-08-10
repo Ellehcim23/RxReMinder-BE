@@ -1,4 +1,7 @@
 # RxReMinder 
+## Authentication
+
+RxReMinder Backend provides authentication mechanisms to secure the API and ensure that only authorized users can access certain routes. Currently, the API uses JSON Web Tokens (JWT) for authentication.
 
 ## Installation
 
@@ -24,10 +27,28 @@ To start the server, run the following command: `npm start`
 - `/medications` - CRUD operations for doses
 - `/doses` - CRUD operations for doses
 
+### Sample Array of Medications List for Database
+```
+const painRelievers = [
+  {
+    medicationName: "Ibuprofen",
+    directions: "Take with food to avoid stomach upset."
+  },
+  {
+    medicationName: "Acetaminophen",
+    directions: "Do not exceed recommended dose. Avoid alcohol."
+  }
+];
+
+console.log(painRelievers);
+```
+
 ## Dependencies
 - mongodb: MongoDB Driver `npm install mongodb`
 
 - moment: Date and time manipulation `npm install moment`
+
+- notification API
 
 ## Project Structure
 - `/controllers` - Route handlers
