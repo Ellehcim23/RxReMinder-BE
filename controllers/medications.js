@@ -11,7 +11,8 @@ const { JWT_SECRET } = process.env;
 const { Medication } = require('../models');
 
 // GET route for /medications
-router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+// router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.get('/', (req, res) => {
     Medication.find({})
         .then(medications => {
             if (medications) {
