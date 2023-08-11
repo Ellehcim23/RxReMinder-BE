@@ -2,10 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const { JWT_SECRET } = process.env;
 
 // import the Medication model
 const { Medication } = require('../models');
