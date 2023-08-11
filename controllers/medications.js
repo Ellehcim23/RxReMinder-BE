@@ -2,16 +2,14 @@
 require('dotenv').config();
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const { JWT_SECRET } = process.env;
 
 // import the Medication model
 const { Medication } = require('../models');
 
 // GET route for /medications
-router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+// router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.get('/', (req, res) => {
     Medication.find({})
         .then(medications => {
             if (medications) {
