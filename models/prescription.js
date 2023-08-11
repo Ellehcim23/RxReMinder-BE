@@ -8,7 +8,7 @@ const prescriptionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Dose'
     }],
-    quantity: Number,
+    quantity: String,
     notes: String,
 }, { timestamps: true });
 
