@@ -38,8 +38,8 @@ router.get('/dailypercentage', passport.authenticate('jwt', { session: false }),
             // returns null if no doses for the day
             res.status(200).json(null);
         }
-
-        for (let i = 0, taken = 0, untaken = 0; i < todaysDoses.length; i++) {
+        let taken = 0, untaken = 0;
+        for (let i = 0; i < todaysDoses.length; i++) {
             if (todaysDoses[i].taken) {
                 taken++;
             } else {
