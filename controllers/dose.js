@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET user's untaken doses for the current day http://localhost:8000/doses
-router.get('/today', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.get('/daydoses', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const doses = await Dose.find({ user: req.user.id, taken: false }).populate('medication').populate('prescription').populate('user');
         
