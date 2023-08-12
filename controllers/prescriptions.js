@@ -4,7 +4,7 @@ const passport = require('passport');
 const { DateTime } = require('luxon');
 
 // import the Prescription model
-const { Prescription, Medication, Dose, User }= require('../models');
+const { Prescription, Medication, Dose, User } = require('../models');
 
 // GET all prescriptions
 router.get('/', async (req, res) => {
@@ -30,6 +30,16 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// GET prescriptions by User ID http://localhost:8000/prescriptions/users/64d3e808dd702ff791142439
+router.get('/users/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const prescriptions = await Prescription.find({ user: userId }).populate('medication');
+        res.status(200).json(prescriptions);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching prescriptions', error });
+    }
+});
 
 // POST a new prescription
 router.post('/new', passport.authenticate('jwt', { session: false }), async (req, res) => {
@@ -75,7 +85,7 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
 
         let user = await User.findById(userId);
         let med = await Medication.findById(medId);
-        
+
         const newPrescription = new Prescription({
             user: user,
             medication: med,
