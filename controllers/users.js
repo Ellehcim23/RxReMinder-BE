@@ -171,7 +171,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/', passport.authenticate('jwt', { session: false }), (req, res) => {
     const updateQuery = {};
     // check firstName
     if (req.body.firstName) {
@@ -194,7 +194,7 @@ router.put('/:id', (req, res) => {
         updateQuery.phoneNumber = req.body.phoneNumber;
     }
 
-    User.findByIdAndUpdate(req.params.id, { $set: updateQuery }, { new: true })
+    User.findByIdAndUpdate(req.user.id, { $set: updateQuery }, { new: true })
         .then((user) => {
             return res.json({ message: `${user.email} was updated`, user: user });
         })
@@ -206,11 +206,11 @@ router.put('/:id', (req, res) => {
 
 
 // DELETE route for /users/:id
-router.delete('/:id', (req, res) => {
+router.delete('/', passport.authenticate('jwt', { session: false }), (req, res) => {
 
-    User.findByIdAndDelete(req.params.id)
+    User.findByIdAndDelete(req.user.id)
         .then((result) => {
-            return res.json({ message: `user at ${req.params.id} was delete` });
+            return res.json({ message: `user at ${req.user.id} was delete` });
         })
         .catch((error) => {
             console.log('error inside DELETE /users/:id', error);
