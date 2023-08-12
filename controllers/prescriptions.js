@@ -66,6 +66,7 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
                 }
             case 'once':
                 for (let i = 0; i < numDays; i++) {
+                    console.log(DateTime.fromISO(firstTime1).plus({ days: i }).toISO());
                     dose1Times.push(DateTime.fromISO(firstTime1).plus({ days: i }).toISO());
                 }
                 break;
@@ -80,6 +81,8 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
                 }
                 break;
         }
+        // console.log(dose1Times);
+        // console.log(dose2Times);
 
         // console.log('dose1Times', dose1Times);
 
@@ -94,6 +97,8 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
         });
         user.prescriptions.push(newPrescription);
         await user.save();
+        // console.log(newPrescription);
+
 
         for (let i = 0; i < dose1Times.length; i++) {
             // console.log(i);
@@ -105,6 +110,7 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
             });
             await newDose.save();
             newPrescription.doses.push(newDose);
+            await newDose.save();
         }
 
         if (freq === 'twice') {
