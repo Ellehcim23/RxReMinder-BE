@@ -206,11 +206,11 @@ router.put('/', passport.authenticate('jwt', { session: false }), (req, res) => 
 
 
 // DELETE route for /users/:id
-router.delete('/:id', (req, res) => {
+router.delete('/', passport.authenticate('jwt', { session: false }), (req, res) => {
 
-    User.findByIdAndDelete(req.params.id)
+    User.findByIdAndDelete(req.user.id)
         .then((result) => {
-            return res.json({ message: `user at ${req.params.id} was delete` });
+            return res.json({ message: `user at ${req.user.id} was delete` });
         })
         .catch((error) => {
             console.log('error inside DELETE /users/:id', error);
