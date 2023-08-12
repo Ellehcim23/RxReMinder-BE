@@ -21,8 +21,43 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET user's percentage of doses taken for the current day http://localhost:8000/doses
+router.get('/dailypercentage', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    try {
+        const doses = await Dose.find({ user: req.user.id });
+        
+        const today = DateTime.local().startOf('day');
+        const todaysDoses = doses.filter(dose => {
+            const parsedTime = DateTime.fromJSDate(dose.time).startOf('day');
+            // console.log(parsedTime.toISO(), today.toISO(), parsedTime.toISO() === today.toISO());            
+            return parsedTime.toISO() === today.toISO();
+        });
+
+        if (todaysDoses.length === 0) {
+            // res.header("Access-Control-Allow-Origin", "*");
+            // returns null if no doses for the day
+            res.status(200).json(null);
+        }
+
+        for (let i = 0, taken = 0, untaken = 0; i < todaysDoses.length; i++) {
+            if (todaysDoses[i].taken) {
+                taken++;
+            } else {
+                untaken++;
+            }
+        }
+        const percentage = Math.round((taken / (taken + untaken)) * 100);
+
+        // res.header("Access-Control-Allow-Origin", "*");
+        res.status(200).json(percentage);
+    } catch (error) {
+        // res.header("Access-Control-Allow-Origin", "*");
+        res.json({ message: 'There was an issue, please try again...' });
+    }
+});
+
 // GET user's untaken doses for the current day http://localhost:8000/doses
-router.get('/today', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.get('/daydoses', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const doses = await Dose.find({ user: req.user.id, taken: false }).populate('medication').populate('prescription').populate('user');
         
