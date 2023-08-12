@@ -27,7 +27,7 @@ router.get('/', (req, res) => {
 });
 
 // GET a specific user by ID
-router.get('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
@@ -171,7 +171,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/', passport.authenticate('jwt', { session: false }), (req, res) => {
     const updateQuery = {};
     // check firstName
     if (req.body.firstName) {
@@ -194,7 +194,7 @@ router.put('/:id', (req, res) => {
         updateQuery.phoneNumber = req.body.phoneNumber;
     }
 
-    User.findByIdAndUpdate(req.params.id, { $set: updateQuery }, { new: true })
+    User.findByIdAndUpdate(req.user.id, { $set: updateQuery }, { new: true })
         .then((user) => {
             return res.json({ message: `${user.email} was updated`, user: user });
         })
