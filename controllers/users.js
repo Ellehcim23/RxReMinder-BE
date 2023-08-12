@@ -26,6 +26,21 @@ router.get('/', (req, res) => {
         });
 });
 
+// GET a specific user by ID
+router.get('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+        } else {
+            res.status(200).json(user);
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user', error });
+    }
+});
+
+
 // private
 router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
     // console.log(req.body);
@@ -41,23 +56,23 @@ router.get('/:field/:value', (req, res) => {
     let field = req.params.field;
     let value = req.params.value;
     // console.log('field', 'value', field, value);
-    
-    User.find({ [field]:[value] })
-    .then((users) => {
-        // console.log("user", user);
 
-        let birthdateParsedUsers = users.map(user => {
-            let parsedUser = {...user._doc};
-            parsedUser.birthdate = moment(user.birthdate).format('MMMM Do YYYY');
-            // console.log(parsedUser);
-            return parsedUser;
+    User.find({ [field]: [value] })
+        .then((users) => {
+            // console.log("user", user);
+
+            let birthdateParsedUsers = users.map(user => {
+                let parsedUser = { ...user._doc };
+                parsedUser.birthdate = moment(user.birthdate).format('MMMM Do YYYY');
+                // console.log(parsedUser);
+                return parsedUser;
+            });
+            return res.json({ users: birthdateParsedUsers });
+        })
+        .catch(error => {
+            console.log('error', error);
+            return res.json({ message: 'There was an issue please try again...' });
         });
-        return res.json({ users: birthdateParsedUsers });
-    })
-    .catch(error => {
-        console.log('error', error);
-        return res.json({ message: 'There was an issue please try again...' });
-    });
 });
 
 router.post('/signup', (req, res) => {
@@ -66,50 +81,50 @@ router.post('/signup', (req, res) => {
     // console.log('===> /register -> req.body',req.body);
 
     User.findOne({ email: req.body.email })
-    .then(user => {
-        // if email already exists, a user will come back
-        if (user) {
-            // send a 400 response
-            return res.status(400).json({ message: 'Email already exists' });
-        } else {
-            // Create a new user
-            const newUser = new User({
-                firstName: req.body.firstName,
-                lastName: req.body.lastName,
-                email: req.body.email,
-                birthdate: req.body.birthdate,
-                phoneNumber: req.body.phoneNumber,
-                password: req.body.password
-            });
+        .then(user => {
+            // if email already exists, a user will come back
+            if (user) {
+                // send a 400 response
+                return res.status(400).json({ message: 'Email already exists' });
+            } else {
+                // Create a new user
+                const newUser = new User({
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    email: req.body.email,
+                    birthdate: req.body.birthdate,
+                    phoneNumber: req.body.phoneNumber,
+                    password: req.body.password
+                });
 
-            // Salt and hash the password - before saving the user
-            bcrypt.genSalt(10, (err, salt) => {
-                if (err) throw Error;
+                // Salt and hash the password - before saving the user
+                bcrypt.genSalt(10, (err, salt) => {
+                    if (err) throw Error;
 
-                bcrypt.hash(newUser.password, salt, (err, hash) => {
-                    if (err) console.log('==> Error inside of hash', err);
-                    // Change the password in newUser to the hash
-                    newUser.password = hash;
-                    newUser.save()
-                    .then(createdUser => {
-                        // remove password from being returned inside of response, still in DB
-                        if (createdUser.password) {
-                            createdUser.password = '...' // hide the password
-                            res.json({ user: createdUser });
-                        }
-                    })
-                    .catch(err => {
-                        console.log('error with creating new user', err);
-                        res.json({ message: 'Error occured... Please try again.'});
+                    bcrypt.hash(newUser.password, salt, (err, hash) => {
+                        if (err) console.log('==> Error inside of hash', err);
+                        // Change the password in newUser to the hash
+                        newUser.password = hash;
+                        newUser.save()
+                            .then(createdUser => {
+                                // remove password from being returned inside of response, still in DB
+                                if (createdUser.password) {
+                                    createdUser.password = '...'; // hide the password
+                                    res.json({ user: createdUser });
+                                }
+                            })
+                            .catch(err => {
+                                console.log('error with creating new user', err);
+                                res.json({ message: 'Error occured... Please try again.' });
+                            });
                     });
                 });
-            });
-        }
-    })
-    .catch(err => { 
-        console.log('Error finding user', err);
-        res.json({ message: 'Error occured... Please try again.'})
-    })
+            }
+        })
+        .catch(err => {
+            console.log('Error finding user', err);
+            res.json({ message: 'Error occured... Please try again.' });
+        });
 });
 
 router.post('/login', async (req, res) => {
@@ -136,11 +151,11 @@ router.post('/login', async (req, res) => {
                 birthdate: moment(foundUser.birthdate).format('MMMM Do YYYY'),
                 phoneNumber: foundUser.phoneNumber,
                 prescriptions: foundUser.prescriptions,
-            }
+            };
 
             jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
                 if (err) {
-                    res.status(400).json({ message: 'Session has endedd, please log in again'});
+                    res.status(400).json({ message: 'Session has endedd, please log in again' });
                 }
                 const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
                 // console.log('===> legit', legit);
@@ -157,50 +172,50 @@ router.post('/login', async (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
-    const updateQuery = {}
+    const updateQuery = {};
     // check firstName
     if (req.body.firstName) {
-        updateQuery.firstName = req.body.firstName
+        updateQuery.firstName = req.body.firstName;
     }
     // check lastName
     if (req.body.lastName) {
-        updateQuery.lastName = req.body.lastName
+        updateQuery.lastName = req.body.lastName;
     }
     // check email
     if (req.body.email) {
-        updateQuery.email = req.body.email
+        updateQuery.email = req.body.email;
     }
     // check birthdate
     if (req.body.birthdate) {
-        updateQuery.birthdate = req.body.birthdate
+        updateQuery.birthdate = req.body.birthdate;
     }
     // check phoneNumber
     if (req.body.phoneNumber) {
-        updateQuery.phoneNumber = req.body.phoneNumber
+        updateQuery.phoneNumber = req.body.phoneNumber;
     }
 
-    User.findByIdAndUpdate(req.params.id, {$set: updateQuery }, {new: true})
-    .then((user) => {
-        return res.json({ message: `${user.email} was updated`, user: user});
-    })
-    .catch((error) => {
-        console.log('error inside PUT /users/:id', error);
-        return res.json({ message: 'error occured, please try again.' });
-    });
+    User.findByIdAndUpdate(req.params.id, { $set: updateQuery }, { new: true })
+        .then((user) => {
+            return res.json({ message: `${user.email} was updated`, user: user });
+        })
+        .catch((error) => {
+            console.log('error inside PUT /users/:id', error);
+            return res.json({ message: 'error occured, please try again.' });
+        });
 });
 
 
 // DELETE route for /users/:id
 router.delete('/:id', (req, res) => {
-    
+
     User.findByIdAndDelete(req.params.id)
-    .then((result) => {
-        return res.json({ message: `user at ${req.params.id} was delete`});
-    })
-    .catch((error) => {
-        console.log('error inside DELETE /users/:id', error);
-        return res.json({ message: 'error occured, please try again.' });
-    });
+        .then((result) => {
+            return res.json({ message: `user at ${req.params.id} was delete` });
+        })
+        .catch((error) => {
+            console.log('error inside DELETE /users/:id', error);
+            return res.json({ message: 'error occured, please try again.' });
+        });
 });
 
 module.exports = router;
