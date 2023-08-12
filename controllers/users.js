@@ -27,7 +27,7 @@ router.get('/', (req, res) => {
 });
 
 // GET a specific user by ID
-router.get('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
