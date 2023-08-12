@@ -93,6 +93,7 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
                 medication: med,
                 time: dose1Times[i],
             });
+            await newDose.save();
             newPrescription.doses.push(newDose);
         }
 
@@ -104,6 +105,7 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
                     medication: med,
                     time: dose2Times[i],
                 });
+                await newDose.save();
                 newPrescription.doses.push(newDose);
             }
         }
