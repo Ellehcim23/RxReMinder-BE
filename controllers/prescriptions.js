@@ -31,7 +31,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // GET prescriptions by User ID http://localhost:8000/prescriptions/users/64d3e808dd702ff791142439
-router.get('/users/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
+router.get('/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
         const prescriptions = await Prescription.find({ user: userId }).populate('medication');
@@ -66,6 +66,7 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
                 }
             case 'once':
                 for (let i = 0; i < numDays; i++) {
+                    console.log(DateTime.fromISO(firstTime1).plus({ days: i }).toISO());
                     dose1Times.push(DateTime.fromISO(firstTime1).plus({ days: i }).toISO());
                 }
                 break;
@@ -80,6 +81,8 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
                 }
                 break;
         }
+        // console.log(dose1Times);
+        // console.log(dose2Times);
 
         // console.log('dose1Times', dose1Times);
 
@@ -94,6 +97,8 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
         });
         user.prescriptions.push(newPrescription);
         await user.save();
+        // console.log(newPrescription);
+
 
         for (let i = 0; i < dose1Times.length; i++) {
             // console.log(i);
@@ -105,6 +110,7 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
             });
             await newDose.save();
             newPrescription.doses.push(newDose);
+            await newDose.save();
         }
 
         if (freq === 'twice') {
@@ -130,7 +136,7 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
 });
 
 // PUT/update a prescription
-router.put('/:id', async (req, res) => {
+router.put('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const updatedPrescription = await Prescription.findByIdAndUpdate(
             req.params.id,
@@ -148,13 +154,36 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE a prescription
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const deletedPrescription = await Prescription.findByIdAndDelete(req.params.id);
+
         if (!deletedPrescription) {
             res.status(404).json({ message: 'Prescription not found' });
         } else {
-            res.status(200).json({ message: 'Prescription deleted successfully', prescription: deletedPrescription });
+            const deletedDoses = [];
+
+            // Delete all the doses associated with the prescription
+            await Promise.all(deletedPrescription.doses.map(async doseId => {
+                const deletedDose = await Dose.findByIdAndDelete(doseId);
+                // You can perform additional operations with the deleted dose if needed
+                deletedDoses.push(deletedDose);
+            }));
+
+            // Remove the prescription ID from the user's prescriptions array
+            const deletedUser = await User.findByIdAndUpdate(
+                deletedPrescription.user,
+                { $pull: { prescriptions: deletedPrescription._id } },
+                { new: true }
+            );
+
+            res.status(200).json({
+                message: 'Prescription deleted successfully',
+                prescription: deletedPrescription,
+                deletedMedication: deletedMedication,
+                deletedUser: deletedUser,
+                deletedDoses: deletedDoses
+            });
         }
     } catch (error) {
         res.status(500).json({ message: 'Error deleting prescription', error });
