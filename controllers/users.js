@@ -122,7 +122,7 @@ router.post('/login', async (req, res) => {
     if (foundUser) {
         // user is in the DB
         let isMatch = await bcrypt.compareSync(req.body.password, foundUser.password);
-        console.log('Does the passwords match?', isMatch);
+        // console.log('Does the passwords match?', isMatch);
         if (isMatch) {
             // if user match, then we want to send a JSON Web Token
             // Create a token payload
@@ -143,7 +143,7 @@ router.post('/login', async (req, res) => {
                     res.status(400).json({ message: 'Session has endedd, please log in again'});
                 }
                 const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
-                console.log('===> legit', legit);
+                // console.log('===> legit', legit);
                 delete legit.password; // remove before showing response
                 res.json({ success: true, token: `Bearer ${token}`, userData: legit });
             });
