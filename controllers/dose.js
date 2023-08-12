@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET user's percentage of doses taken for the current day http://localhost:8000/doses
+// GET user's percentage of doses taken for the current day http://localhost:8000/doses/dailypercentage
 router.get('/dailypercentage', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const doses = await Dose.find({ user: req.user.id });
@@ -56,7 +56,50 @@ router.get('/dailypercentage', passport.authenticate('jwt', { session: false }),
     }
 });
 
-// GET user's untaken doses for the current day http://localhost:8000/doses
+// GET user's percentage of doses taken for the past 7 days including today http://localhost:8000/doses/weeklypercentages
+router.get('/weeklypercentages', passport.authenticate('jwt', { session: false }), async (req, res) => {
+// router.get('/weeklypercentages', async (req, res) => {
+    try {
+        const doses = await Dose.find({ user: req.user.id });
+
+        const weeklypercentages = [];
+        const dates = [];
+        for (let i = 0; i < 7; i++) {
+            dates.unshift(DateTime.local().minus({ days: i }).startOf('day'));
+        }
+
+        for (let i = 0; i < dates.length; i++) {
+            const todaysDoses = doses.filter(dose => {
+                const parsedTime = DateTime.fromJSDate(dose.time).startOf('day');
+                // console.log(parsedTime.toISO(), dates[i].toISO(), parsedTime.toISO() === dates[i].toISO());            
+                return parsedTime.toISO() === dates[i].toISO();
+            });
+
+            if (todaysDoses.length === 0) {
+                weeklypercentages.push(null);
+            }
+            else {
+                let taken = 0, untaken = 0;
+                for (let i = 0; i < todaysDoses.length; i++) {
+                    if (todaysDoses[i].taken) {
+                        taken++;
+                    } else {
+                        untaken++;
+                    }
+                }
+                const percentage = Math.round((taken / (taken + untaken)) * 100);
+                weeklypercentages.push(percentage);
+
+            }
+        }
+        res.status(200).json(weeklypercentages);
+    } catch (error) {
+        // res.header("Access-Control-Allow-Origin", "*");
+        res.json({ message: 'There was an issue, please try again...' });
+    }
+});
+
+// GET user's untaken doses for the current day http://localhost:8000/doses/daydoses
 router.get('/daydoses', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const doses = await Dose.find({ user: req.user.id, taken: false }).populate('medication').populate('prescription').populate('user');
