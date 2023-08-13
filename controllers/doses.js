@@ -4,7 +4,7 @@ const { DateTime } = require('luxon');
 const passport = require('passport');
 
 // import the Dose model
-const { Dose } = require('../models/');
+const { Dose } = require('../models');
 
 // middleware to protect all routes
 // router.use(passport.authenticate('jwt', { session: false }));
