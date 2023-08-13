@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 // GET a specific prescription by ID
 router.get('/:id', async (req, res) => {
     try {
-        const prescription = await Prescription.findById(req.params.id);
+        const prescription = await Prescription.findById(req.params.id).populate('medication').populate('doses');
         if (!prescription) {
             res.status(404).json({ message: 'Prescription not found' });
         } else {
