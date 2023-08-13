@@ -118,6 +118,54 @@ router.get('/daydoses', passport.authenticate('jwt', { session: false }), async 
     }
 });
 
+router.get('/month/:month/:year', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    try {
+        const doses = await Dose.find({ user: req.user.id, taken: false });
+        
+        const month = parseInt(req.params.month);
+        const year = parseInt(req.params.year);
+        // console.log('test');
+        const monthDoses = doses.filter(dose => {
+            const parsedMonth = DateTime.fromJSDate(dose.time).month;
+            const parsedYear = DateTime.fromJSDate(dose.time).year;
+            // console.log(parsedYear);
+            // if(parsedMonth === month) console.log(dose.time);
+            console.log(parsedMonth, month, parsedMonth === month);
+            console.log(parsedYear, year, parsedYear === year);
+            // console.log(parsed)
+            return (parsedMonth === month && parsedYear === year);
+        });
+        
+        const days = {};
+        for (let i = 1; i <= 31; i++) {
+            if (i < DateTime.local().day && month === DateTime.local().month) {
+                // console.log(i, DateTime.local().day);
+                days[i] = false;
+            }
+            else {
+                let foundDose = false;
+                for(let j = 0; j < monthDoses.length; j++) {
+                    const doseDay = DateTime.fromJSDate(monthDoses[j].time).day;
+                    if (doseDay === i) {
+                        foundDose = true;
+                        break;
+                    }
+                }
+
+                days[i] = foundDose;
+            }
+
+        }
+
+        // res.header("Access-Control-Allow-Origin", "*");
+        res.status(200).json(days);
+    } catch (error) {
+        // res.header("Access-Control-Allow-Origin", "*");
+        res.json({ message: 'There was an issue, please try again...' });
+    }
+});
+
+
 // GET a specific doses by ID http://localhost:8000/doses/:id
 router.get('/:id', async (req, res) => {
     try {
