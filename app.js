@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/users', require('./controllers/users'));
-app.use('/doses', require('./controllers/dose'));
+app.use('/doses', require('./controllers/doses'));
 app.use('/medications', require('./controllers/medications'));
 app.use('/prescriptions', require('./controllers/prescriptions'));
 
