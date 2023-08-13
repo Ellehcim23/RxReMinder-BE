@@ -124,15 +124,11 @@ router.get('/month/:month/:year', passport.authenticate('jwt', { session: false 
         
         const month = parseInt(req.params.month);
         const year = parseInt(req.params.year);
-        // console.log('test');
         const monthDoses = doses.filter(dose => {
             const parsedMonth = DateTime.fromJSDate(dose.time).month;
             const parsedYear = DateTime.fromJSDate(dose.time).year;
-            // console.log(parsedYear);
-            // if(parsedMonth === month) console.log(dose.time);
-            console.log(parsedMonth, month, parsedMonth === month);
-            console.log(parsedYear, year, parsedYear === year);
-            // console.log(parsed)
+            // console.log(parsedMonth, month, parsedMonth === month);
+            // console.log(parsedYear, year, parsedYear === year);
             return (parsedMonth === month && parsedYear === year);
         });
         
