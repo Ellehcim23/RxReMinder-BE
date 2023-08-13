@@ -23,7 +23,38 @@ router.get('/:id', async (req, res) => {
         if (!prescription) {
             res.status(404).json({ message: 'Prescription not found' });
         } else {
-            res.status(200).json(prescription);
+            let freq, startDate, endDate, time1, time2;
+            
+            let firstDose = DateTime.fromJSDate(prescription.doses[0].time);
+            let secondDose = DateTime.fromJSDate(prescription.doses[1].time);
+            let lastDose = DateTime.fromJSDate(prescription.doses[prescription.doses.length - 1].time);
+            
+            // calculate frequency
+            let diff = secondDose.diff(firstDose, 'hours').toObject().hours;
+            switch (diff) {
+                case 24:
+                    freq = 'once';
+                    break;
+                case 48:
+                    freq = 'alternate';
+                    break;
+                case 168:
+                    freq = 'weekly';
+                    break;
+                default:
+                    freq = 'twice';
+                    break;
+            }
+
+            // calculate start date
+            startDate = firstDose.toFormat('yyyy-MM-dd');
+            endDate = lastDose.toFormat('yyyy-MM-dd');
+
+            // calculate dose time(s) of day
+            time1 = firstDose.toFormat('hh:mm a');
+            if (freq === 'twice') time2 = secondDose.toFormat('hh:mm a');
+
+            res.status(200).json({ prescription, freq, startDate, endDate, time1, time2 });
         }
     } catch (error) {
         res.status(500).json({ message: 'Error fetching prescription', error });
@@ -66,7 +97,7 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
                 }
             case 'once':
                 for (let i = 0; i < numDays; i++) {
-                    console.log(DateTime.fromISO(firstTime1).plus({ days: i }).toISO());
+                    // console.log(DateTime.fromISO(firstTime1).plus({ days: i }).toISO());
                     dose1Times.push(DateTime.fromISO(firstTime1).plus({ days: i }).toISO());
                 }
                 break;
@@ -110,11 +141,8 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
             });
             await newDose.save();
             newPrescription.doses.push(newDose);
-            await newDose.save();
-        }
 
-        if (freq === 'twice') {
-            for (let i = 0; i < dose2Times.length; i++) {
+            if(freq === 'twice') {
                 const newDose = new Dose({
                     user: user,
                     prescription: newPrescription,
@@ -171,7 +199,7 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }), async (r
             }));
 
             // Remove the prescription ID from the user's prescriptions array
-            const deletedUser = await User.findByIdAndUpdate(
+            const user = await User.findByIdAndUpdate(
                 deletedPrescription.user,
                 { $pull: { prescriptions: deletedPrescription._id } },
                 { new: true }
@@ -180,9 +208,8 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }), async (r
             res.status(200).json({
                 message: 'Prescription deleted successfully',
                 prescription: deletedPrescription,
-                deletedMedication: deletedMedication,
-                deletedUser: deletedUser,
-                deletedDoses: deletedDoses
+                user: user,
+                deletedDoses: deletedDoses,
             });
         }
     } catch (error) {
@@ -190,6 +217,4 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }), async (r
     }
 });
 
-
 module.exports = router;
-
