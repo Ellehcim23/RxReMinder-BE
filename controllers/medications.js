@@ -52,34 +52,34 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/new', passport.authenticate('jwt', { session: false }), async (req, res) => {
-    let user;
     if (!req.user.id) {
-        return res.json({ message: 'You must be logged in to create a medication' });
+        return res.status(403).json({ message: 'You must be logged in to create a medication.' });
     }
     const newMedication = {
         name: req.body.name,
         category: req.body.category,
         directions: req.body.directions,
     }
-    Medication.findOne(newMedication.name)
+    Medication.findOne({ name: newMedication.name} )
     .then(medication => {
-        if (medication){
-            return res.json({ message: `${medication.name} already exists` });
+        if (medication) {
+            // console.log(medication);
+            return res.status(409).json({ message: `${medication.name} already exists.` });
         } else {
             Medication.create(newMedication)
             .then(newMedication => {
-                console.log('newMedication was created', newMedication);
-                return res.json({ medication: newMedication });
+                // console.log('newMedication was created', newMedication);
+                return res.status(201).json({ medication: newMedication });
             })
             .catch(error => {
                 console.log('error', error);
-                return res.json({ message: 'There was an issue please try again...' });
+                return res.status(400).json({ message: 'There was an issue please try again...' });
             });
         }
     })
     .catch(error => {
-    console.log('error', error);
-    return res.json({ message: 'There was an issue please try again...' });
+        console.log('error', error);
+        return res.status(400).json({ message: 'There was an issue please try again...' });
     });
    
 })
