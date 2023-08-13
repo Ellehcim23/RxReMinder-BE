@@ -30,10 +30,10 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// GET prescriptions by User ID http://localhost:8000/prescriptions/users/64d3e808dd702ff791142439
-router.get('/users/:id', async (req, res) => {
+// GET prescriptions by User ID http://localhost:8000/prescriptions/user
+router.get('/user', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = req.user.id;
         const prescriptions = await Prescription.find({ user: userId }).populate('medication');
         res.status(200).json(prescriptions);
     } catch (error) {
