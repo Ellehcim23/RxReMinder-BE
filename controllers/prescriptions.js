@@ -51,8 +51,8 @@ router.get('/:id', async (req, res) => {
             endDate = lastDose.toFormat('yyyy-MM-dd');
 
             // calculate dose time(s) of day
-            time1 = firstDose.toFormat('HH:mm');
-            if (freq === 'twice') time2 = secondDose.toFormat('HH:mm');
+            time1 = firstDose.toFormat('hh:mm a');
+            if (freq === 'twice') time2 = secondDose.toFormat('hh:mm a');
 
             res.status(200).json({ prescription, freq, startDate, endDate, time1, time2 });
         }
