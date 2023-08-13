@@ -46,7 +46,7 @@ router.get('/profile', passport.authenticate('jwt', { session: false }), (req, r
     // console.log(req.body);
     // console.log(req.user);
     const { id, firstName, lastName, email, username, birthdate, phoneNumber, prescriptions } = req.user; // object with user object inside
-    birthdate = moment(birthdate).format('MMMM Do YYYY');
+    // birthdate = moment(birthdate).format('MMMM Do YYYY');
     res.json({ id, firstName, lastName, email, username, birthdate, phoneNumber, prescriptions });
 });
 
@@ -63,7 +63,7 @@ router.get('/:field/:value', (req, res) => {
 
             let birthdateParsedUsers = users.map(user => {
                 let parsedUser = { ...user._doc };
-                parsedUser.birthdate = moment(user.birthdate).format('MMMM Do YYYY');
+                parsedUser.birthdate = moment(user.birthdate).format('YYYY-MM-DD');
                 // console.log(parsedUser);
                 return parsedUser;
             });
