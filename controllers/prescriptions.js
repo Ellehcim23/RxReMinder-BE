@@ -16,6 +16,100 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET prescriptions by User ID http://localhost:8000/prescriptions/user
+router.get('/mymedications', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const prescriptions = await Prescription.find({ user: userId }).populate('medication').populate('doses');
+
+        for (let i = 0; i < prescriptions.length; i++) {
+            let freq, startDate, endDate, time1, time2;
+
+            let firstDose = DateTime.fromJSDate(prescriptions[i].doses[0].time);
+            let secondDose = DateTime.fromJSDate(prescriptions[i].doses[1].time);
+            let lastDose = DateTime.fromJSDate(prescriptions[i].doses[prescriptions[i].doses.length - 1].time);
+
+        //     // calculate frequency
+        //     let diff = secondDose.diff(firstDose, 'hours').toObject().hours;
+        //     switch (diff) {
+        //         case 24:
+        //             freq = 'once';
+        //             break;
+        //         case 48:
+        //             freq = 'alternate';
+        //             break;
+        //         case 168:
+        //             freq = 'weekly';
+        //             break;
+        //         default:
+        //             freq = 'twice';
+        //             break;
+        //     }
+
+        //     // calculate start date
+        //     startDate = firstDose.toFormat('yyyy-MM-dd');
+        //     endDate = lastDose.toFormat('yyyy-MM-dd');
+            
+        //     // calculate dose time(s) of day
+        //     time1 = firstDose.toFormat('hh:mm a');
+        //     if (freq === 'twice') time2 = secondDose.toFormat('hh:mm a');
+
+        //     prescriptions[i] = { prescription: prescriptions[i], freq, startDate, endDate, time1, time2 };
+        }
+
+        res.status(200).json(prescriptions);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching prescriptions', error });
+    }
+});
+
+// GET prescriptions by User ID http://localhost:8000/prescriptions/user
+router.get('/user', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const prescriptions = await Prescription.find({ user: userId }).populate('medication').populate('doses');
+
+        for (let i = 0; i < prescriptions.length; i++) {
+            let freq, startDate, endDate, time1, time2;
+
+            let firstDose = DateTime.fromJSDate(prescriptions[i].doses[0].time);
+            let secondDose = DateTime.fromJSDate(prescriptions[i].doses[1].time);
+            let lastDose = DateTime.fromJSDate(prescriptions[i].doses[prescriptions[i].doses.length - 1].time);
+
+        //     // calculate frequency
+        //     let diff = secondDose.diff(firstDose, 'hours').toObject().hours;
+        //     switch (diff) {
+        //         case 24:
+        //             freq = 'once';
+        //             break;
+        //         case 48:
+        //             freq = 'alternate';
+        //             break;
+        //         case 168:
+        //             freq = 'weekly';
+        //             break;
+        //         default:
+        //             freq = 'twice';
+        //             break;
+        //     }
+
+        //     // calculate start date
+        //     startDate = firstDose.toFormat('yyyy-MM-dd');
+        //     endDate = lastDose.toFormat('yyyy-MM-dd');
+            
+        //     // calculate dose time(s) of day
+        //     time1 = firstDose.toFormat('hh:mm a');
+        //     if (freq === 'twice') time2 = secondDose.toFormat('hh:mm a');
+
+        //     prescriptions[i] = { prescription: prescriptions[i], freq, startDate, endDate, time1, time2 };
+        }
+
+        res.status(200).json(prescriptions);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching prescriptions', error });
+    }
+});
+
 // GET a specific prescription by ID
 router.get('/:id', async (req, res) => {
     try {
@@ -58,17 +152,6 @@ router.get('/:id', async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Error fetching prescription', error });
-    }
-});
-
-// GET prescriptions by User ID http://localhost:8000/prescriptions/user
-router.get('/user', passport.authenticate('jwt', { session: false }), async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const prescriptions = await Prescription.find({ user: userId }).populate('medication');
-        res.status(200).json(prescriptions);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching prescriptions', error });
     }
 });
 

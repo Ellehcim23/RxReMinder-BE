@@ -5,7 +5,7 @@ const router = express.Router();
 const passport = require('passport');
 
 // import the Medication model
-const { Medication } = require('../models');
+const { Prescription, Medication } = require('../models');
 
 // GET route for /medications
 // router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
@@ -22,6 +22,31 @@ router.get('/', (req, res) => {
             console.log('error', error);
             return res.json({ message: 'this is an issue, please try again' });
         });
+});
+
+// GET medications by User ID http://localhost:8000/medications/user
+router.get('/user', passport.authenticate('jwt', { session: false }), async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const prescriptions = await Prescription.find({ user: userId }).populate('medication');
+
+        // console.log(prescriptions.length);
+
+        const medications = [];
+        const medicationIds = [];
+
+        for (let i = 0; i < prescriptions.length; i++) {
+            if(!medicationIds.includes(prescriptions[i].medication._id)) {
+                medications.push(prescriptions[i].medication);
+                medicationIds.push(prescriptions[i].medication._id);
+            }
+        }
+
+        res.status(200).json(medications);
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: 'Error fetching medications', error });
+    }
 });
 
 router.get('/:field/:value', (req, res) => {
