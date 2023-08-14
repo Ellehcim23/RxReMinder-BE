@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@faker-js/faker": "^8.0.2",
+    "@trycourier/courier": "^5.0.0",
     "bcryptjs": "^2.4.3",
     "chai": "^4.3.7",
     "cors": "^2.8.5",
