@@ -7,7 +7,7 @@ const courier = CourierClient({ authorizationToken: process.env.COURIER_KEY });
 
 async function sendNotifications() {
     let doses = await Dose.find({ time: { $lt: new Date() }, taken: false, notified: false }).populate('user').populate('medication').populate('prescription');
-
+    
     for (let i = 0; i < doses.length; i++) {
         let dose = doses[i];
         let email = dose.user.email;
@@ -39,6 +39,7 @@ async function sendNotifications() {
             console.log('Notification failed to send');
         }
     }
+    process.exit(0);
 }
 
 sendNotifications();
