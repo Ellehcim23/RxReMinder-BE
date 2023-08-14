@@ -37,22 +37,23 @@ router.get('/dailypercentage', passport.authenticate('jwt', { session: false }),
             // res.header("Access-Control-Allow-Origin", "*");
             // returns null if no doses for the day
             res.status(200).json(null);
-        }
-        let taken = 0, untaken = 0;
-        for (let i = 0; i < todaysDoses.length; i++) {
-            if (todaysDoses[i].taken) {
-                taken++;
-            } else {
-                untaken++;
+        } else {
+            let taken = 0, untaken = 0;
+            for (let i = 0; i < todaysDoses.length; i++) {
+                if (todaysDoses[i].taken) {
+                    taken++;
+                } else {
+                    untaken++;
+                }
             }
-        }
-        const percentage = Math.round((taken / (taken + untaken)) * 100);
+            const percentage = Math.round((taken / (taken + untaken)) * 100);
 
-        // res.header("Access-Control-Allow-Origin", "*");
-        res.status(200).json(percentage);
+            // res.header("Access-Control-Allow-Origin", "*");
+            res.status(200).json(percentage);
+        }
     } catch (error) {
         // res.header("Access-Control-Allow-Origin", "*");
-        res.json({ message: 'There was an issue, please try again...' });
+        res.status(400).json({ message: 'There was an issue, please try again...' });
     }
 });
 
