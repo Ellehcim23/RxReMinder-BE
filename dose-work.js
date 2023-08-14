@@ -66,11 +66,14 @@ async function deleteFakeUsers() {
 
 async function setAllNotifiedFalse() {
     let doses = await Dose.find({ notified: true });
+    console.log(doses.length);
     doses.forEach(async dose => {
+        console.log('test', dose.notified);
         dose.notified = false;
-        await dose.save();
+        let savedDose = await dose.save();
+        console.log('after', savedDose.notified);
     });
-    process.exit(0);
+    // process.exit(0);
 }
 
 // randomlyTakeDoses();
