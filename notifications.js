@@ -6,11 +6,12 @@ const { CourierClient } = require('@trycourier/courier');
 const courier = CourierClient({ authorizationToken: process.env.COURIER_KEY });
 
 async function sendNotifications() {
-    let doses = await Dose.find({ time: { $lt: new Date() }, taken: false, notified: false }).populate('user').populate('medication').populate('prescription');
+    let doses = await Dose.find({ time: { $lt: new Date() }, taken: false, notified: false }).populate('user').populate('medication').sort({ time: 1 });
     
     console.log(doses.length);
 
     for (let i = 0; i < doses.length; i++) {
+    // for (let i = 0; i < 5; i++) {
         let dose = doses[i];
         let email = dose.user.email;
         let name = dose.user.firstName;
@@ -48,7 +49,7 @@ async function sendNotifications() {
                 },
                 content: {
                     title: "RxReminder Notification",
-                    body: `Hi ${name}, it's ${time} on ${date}, time to take your ${medication}.`,
+                    body: `Hi ${name}, it's ${time} on ${date}, time to take your ${medication}.\n\nhttps://rx-reminder.netlify.app`,
                 },
                 routing: {
                     method: "single",
