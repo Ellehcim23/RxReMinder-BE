@@ -20,17 +20,39 @@ async function sendNotifications() {
 
         console.log(email, name, medication, time, date);
 
+        // const { requestId } = await courier.send({
+        //     message: {
+        //         to: {
+        //             email: email,
+        //         },
+        //         template: "SHMMXQBH9JMGYEQ8RA1M9TNTWFNN",
+        //         data: {
+        //             name: name,
+        //             medication: medication,
+        //             time: time,
+        //             date: date,
+        //         },
+        //     },
+        // });
+
         const { requestId } = await courier.send({
             message: {
                 to: {
+                    data: {
+                        name: name,
+                        medication: medication,
+                        time: time,
+                        date: date,
+                    },
                     email: email,
                 },
-                template: "SHMMXQBH9JMGYEQ8RA1M9TNTWFNN",
-                data: {
-                    name: name,
-                    medication: medication,
-                    time: time,
-                    date: date,
+                content: {
+                    title: "RxReminder Notification",
+                    body: `Hi ${name}, it's ${time} on ${date}, time to take your ${medication}.`,
+                },
+                routing: {
+                    method: "single",
+                    channels: ["email"],
                 },
             },
         });
