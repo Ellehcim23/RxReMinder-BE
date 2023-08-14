@@ -63,8 +63,17 @@ async function deleteFakeUsers() {
     }
 }
 
-randomlyTakeDoses();
+async function setAllNotifiedFalse() {
+    let doses = await Dose.find({ notified: true });
+    doses.forEach(async dose => {
+        dose.notified = false;
+        await dose.save();
+    });
+}
+
+// randomlyTakeDoses();
 // deleteDoseless();
 // deleteNoMedication();
 // deleteAllPrescriptions();
 // deleteFakeUsers();
+setAllNotifiedFalse();
