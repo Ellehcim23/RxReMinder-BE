@@ -76,32 +76,32 @@ router.get('/user', passport.authenticate('jwt', { session: false }), async (req
             let secondDose = DateTime.fromJSDate(prescriptions[i].doses[1].time);
             let lastDose = DateTime.fromJSDate(prescriptions[i].doses[prescriptions[i].doses.length - 1].time);
 
-        //     // calculate frequency
-        //     let diff = secondDose.diff(firstDose, 'hours').toObject().hours;
-        //     switch (diff) {
-        //         case 24:
-        //             freq = 'once';
-        //             break;
-        //         case 48:
-        //             freq = 'alternate';
-        //             break;
-        //         case 168:
-        //             freq = 'weekly';
-        //             break;
-        //         default:
-        //             freq = 'twice';
-        //             break;
-        //     }
+            // calculate frequency
+            let diff = secondDose.diff(firstDose, 'hours').toObject().hours;
+            switch (diff) {
+                case 24:
+                    freq = 'once';
+                    break;
+                case 48:
+                    freq = 'alternate';
+                    break;
+                case 168:
+                    freq = 'weekly';
+                    break;
+                default:
+                    freq = 'twice';
+                    break;
+            }
 
-        //     // calculate start date
-        //     startDate = firstDose.toFormat('yyyy-MM-dd');
-        //     endDate = lastDose.toFormat('yyyy-MM-dd');
+            // calculate start date
+            startDate = firstDose.toFormat('yyyy-MM-dd');
+            endDate = lastDose.toFormat('yyyy-MM-dd');
             
-        //     // calculate dose time(s) of day
-        //     time1 = firstDose.toFormat('hh:mm a');
-        //     if (freq === 'twice') time2 = secondDose.toFormat('hh:mm a');
+            // calculate dose time(s) of day
+            time1 = firstDose.toFormat('hh:mm a');
+            if (freq === 'twice') time2 = secondDose.toFormat('hh:mm a');
 
-        //     prescriptions[i] = { prescription: prescriptions[i], freq, startDate, endDate, time1, time2 };
+            prescriptions[i] = { prescription: prescriptions[i], freq, startDate, endDate, time1, time2 };
         }
 
         res.status(200).json(prescriptions);
