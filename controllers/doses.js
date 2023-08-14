@@ -121,10 +121,11 @@ router.get('/daydoses', passport.authenticate('jwt', { session: false }), async 
 
 router.get('/month/:month/:year', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
-        const doses = await Dose.find({ user: req.user.id, taken: false });
+        const doses = await Dose.find({ user: req.user.id, taken: false }).sort({ time: 1 });
         
         const month = parseInt(req.params.month);
         const year = parseInt(req.params.year);
+
         const monthDoses = doses.filter(dose => {
             const parsedMonth = DateTime.fromJSDate(dose.time).month;
             const parsedYear = DateTime.fromJSDate(dose.time).year;
@@ -135,25 +136,23 @@ router.get('/month/:month/:year', passport.authenticate('jwt', { session: false 
         
         const days = {};
         for (let i = 1; i <= 31; i++) {
-            if (i < DateTime.local().day && month === DateTime.local().month) {
+            // this conditional checks if the day is in the past
+            if (month === DateTime.local().month && year === DateTime.local().year && i < DateTime.local().day) {
                 // console.log(i, DateTime.local().day);
                 days[i] = false;
             }
             else {
                 let foundDose = false;
-                for(let j = 0; j < monthDoses.length; j++) {
+                for (let j = 0; j < monthDoses.length; j++) {
                     const doseDay = DateTime.fromJSDate(monthDoses[j].time).day;
                     if (doseDay === i) {
                         foundDose = true;
                         break;
                     }
                 }
-
                 days[i] = foundDose;
             }
-
         }
-
         // res.header("Access-Control-Allow-Origin", "*");
         res.status(200).json(days);
     } catch (error) {
