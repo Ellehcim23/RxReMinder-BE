@@ -8,6 +8,8 @@ const courier = CourierClient({ authorizationToken: process.env.COURIER_KEY });
 async function sendNotifications() {
     let doses = await Dose.find({ time: { $lt: new Date() }, taken: false, notified: false }).populate('user').populate('medication').populate('prescription');
     
+    console.log(doses.length);
+
     for (let i = 0; i < doses.length; i++) {
         let dose = doses[i];
         let email = dose.user.email;
@@ -15,6 +17,8 @@ async function sendNotifications() {
         let medication = dose.medication.name;
         let time = DateTime.fromJSDate(dose.time).toFormat('h:mm a');
         let date = DateTime.fromJSDate(dose.time).toFormat('ccc, LLL dd');
+
+        console.log(email, name, medication, time, date);
 
         const { requestId } = await courier.send({
             message: {
@@ -30,6 +34,8 @@ async function sendNotifications() {
                 },
             },
         });
+
+        console.log(requestId);
 
         if(requestId) {
             console.log('Notification sent successfully');

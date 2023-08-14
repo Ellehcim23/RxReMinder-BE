@@ -1,4 +1,5 @@
 const { User, Prescription, Dose } = require('./models/');
+const { exists } = require('./models/user');
 
 async function randomlyTakeDoses() {
     let doses = await Dose.find({ user: '64d47c661806b140baabaf0c'});
@@ -69,6 +70,7 @@ async function setAllNotifiedFalse() {
         dose.notified = false;
         await dose.save();
     });
+    process.exit(0);
 }
 
 // randomlyTakeDoses();
