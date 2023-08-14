@@ -2,18 +2,22 @@ const { User, Prescription, Dose } = require('./models/');
 
 async function randomlyTakeDoses() {
     let doses = await Dose.find({ user: '64d47c661806b140baabaf0c'});
-    // console.log(doses.length);
+    console.log(doses.length);
+
+    let oldDoses = doses.filter(dose => dose.time < new Date());
+    console.log(oldDoses.length);
+
     
-    for (let i = 0; i < doses.length; i++) {
+    for (let i = 0; i < oldDoses.length; i++) {
         const random = Math.random();
         if (random > 0.5) {
-            doses[i].taken = true;
-            await doses[i].save();
+            oldDoses[i].taken = true;
+            await oldDoses[i].save();
         }
     }
 
-    for (let i = 0; i < doses.length; i++) {
-        console.log(doses[i].taken);
+    for (let i = 0; i < oldDoses.length; i++) {
+        console.log(oldDoses[i].taken);
     }
 }
 
@@ -45,6 +49,22 @@ async function deleteNoMedication() {
     // console.log(deletedPrescription, user);
 }
 
-// randomlyTakeDoses();
+async function deleteAllPrescriptions() {
+    await Prescription.deleteMany({  });
+    await Dose.deleteMany({  });
+}
+
+async function deleteFakeUsers() {
+    let users = await User.find();
+    
+    for (let i = 0; i < 49; i++) {
+        console.log(i, users[i].email);
+        // await User.findByIdAndDelete(users[i]._id);
+    }
+}
+
+randomlyTakeDoses();
 // deleteDoseless();
-deleteNoMedication();
+// deleteNoMedication();
+// deleteAllPrescriptions();
+// deleteFakeUsers();

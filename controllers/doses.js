@@ -103,7 +103,7 @@ router.get('/weeklypercentages', passport.authenticate('jwt', { session: false }
 // GET user's untaken doses for the current day http://localhost:8000/doses/daydoses
 router.get('/daydoses', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
-        const doses = await Dose.find({ user: req.user.id, taken: false }).populate('medication').populate('prescription').populate('user');
+        const doses = await Dose.find({ user: req.user.id, taken: false }).sort({ time: 1 }).populate('medication').populate('prescription').populate('user');
         
         const today = DateTime.local().startOf('day');
         const todaysDoses = doses.filter(dose => {
