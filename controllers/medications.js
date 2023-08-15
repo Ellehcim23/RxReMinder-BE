@@ -8,19 +8,18 @@ const passport = require('passport');
 const { Prescription, Medication } = require('../models');
 
 // GET route for /medications
-// router.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
 router.get('/', (req, res) => {
     Medication.find({})
         .then(medications => {
             if (medications) {
-                return res.json({ medications: medications });
+                return res.status(200).json({ medications: medications });
             } else {
-                return res.json({ message: 'No medications exists' });
+                return res.status(400).json({ message: 'No medications exists.' });
             }
         })
         .catch(error => {
             console.log('error', error);
-            return res.json({ message: 'this is an issue, please try again' });
+            return res.status(500).json({ message: 'There was an issue, please try again.' });
         });
 });
 
@@ -30,11 +29,10 @@ router.get('/user', passport.authenticate('jwt', { session: false }), async (req
         const userId = req.user.id;
         const prescriptions = await Prescription.find({ user: userId }).populate('medication');
 
-        // console.log(prescriptions.length);
-
         const medications = [];
         const medicationIds = [];
 
+        // finds all unique medication names attached to prescriptions owned by the user
         for (let i = 0; i < prescriptions.length; i++) {
             if(!medicationIds.includes(prescriptions[i].medication._id)) {
                 medications.push(prescriptions[i].medication);
@@ -52,27 +50,25 @@ router.get('/user', passport.authenticate('jwt', { session: false }), async (req
 router.get('/:field/:value', (req, res) => {
     let field = req.params.field;
     let value = req.params.value;
-    // console.log('field', 'value', field, value);
     
     Medication.find({ [field]:[value] })
     .then((medications) => {
-        console.log("medications", medications);
-        return res.json({ medications: medications });
+        return res.status(200).json({ medications: medications });
     })
     .catch(error => {
         console.log('error', error);
-        return res.json({ message: 'There was an issue please try again...' });
+        return res.status(500).json({ message: 'There was an issue please try again...' });
     });
 });
 
 router.get('/:id', (req, res) => {
     Medication.findById(req.params.id)
     .then((medication) => {
-        return res.json({ medication: medication });
+        return res.status(200).json({ medication: medication });
     })
     .catch(error => {
         console.log('error', error);
-        return res.json({ message: 'There was an issue please try again...' });
+        return res.status(500).json({ message: 'There was an issue please try again...' });
     })
 });
 
@@ -88,12 +84,10 @@ router.post('/new', passport.authenticate('jwt', { session: false }), async (req
     Medication.findOne({ name: newMedication.name} )
     .then(medication => {
         if (medication) {
-            // console.log(medication);
             return res.status(409).json({ message: `${medication.name} already exists.` });
         } else {
             Medication.create(newMedication)
             .then(newMedication => {
-                // console.log('newMedication was created', newMedication);
                 return res.status(201).json({ medication: newMedication });
             })
             .catch(error => {
@@ -126,11 +120,11 @@ router.put('/:id', (req, res) => {
     
     Medication.findByIdAndUpdate(req.params.id, { $set: updateQuery }, { new: true })
     .then((medication) => {
-        return res.json({ message: `${medication.name} was updated`, medication: medication });
+        return res.status(202).json({ message: `${medication.name} was updated.`, medication: medication });
     })
     .catch((error) => {
         console.log('error inside PUT /medications/:id', error);
-        return res.json({ message: 'error occured, please try again.' });
+        return res.json({ message: 'An error occured, please try again.' });
     });
 });
 
@@ -139,11 +133,11 @@ router.delete('/:id', (req, res) => {
     
     Medication.findByIdAndDelete(req.params.id)
     .then((result) => {
-        return res.json({ message: `Medication ${req.params.id} was deleted.`});
+        return res.status(200).json({ message: `Medication ${req.params.id} was deleted.`});
     })
     .catch((error) => {
         console.log('error inside DELETE /medications/:id', error);
-        return res.json({ message: 'An error occured, please try again.' });
+        return res.status(500).json({ message: 'An error occured, please try again.' });
     });
 });
 
