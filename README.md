@@ -1,33 +1,45 @@
-# RxReMinder 
+# RxReMinder
+
+Please see the [RxReMinder-FrontEnd repo](https://github.com/kacyphan7/RxReMinder-FrontEnd) for full project details.
 ## Authentication
 
-RxReMinder Backend provides authentication mechanisms to secure the API and ensure that only authorized users can access certain routes. Currently, the API uses JSON Web Tokens (JWT) for authentication.
+RxReMinder Backend provides authentication mechanisms to secure the API and ensure that only authorized users can access sensitive routes. Currently, the API uses JSON Web Tokens (JWT) for authentication.
+
+***
 
 ## Installation
 
-1. Clone the repository:
+1. `fork` and `clone` the [RxReMinder-BE](https://github.com/Ellehcim23/RxReMinder-BE) repository.
+```zsh
+git clone https://github.com/your-username/RxReMinder-BE.git
+cd RxReMinder-BE
+```
+2. Install dependencies.
+```zsh
+npm install
+```
+3. Create a `.env` file in the repository root and add the follow environment variables:
+```
+MONGO_URI=insert-your-database-uri-here
+JWT_SECRET=secret-key-of-your-choice
+COURIER_KEY=your-courier-api-key-here
+```
+4. Start the backend server.
+```zsh
+npm run dev
+```
 
-   ```
-   git clone https://github.com/your-username/RxReMinder-BE.git
-   cd RxReMinder-BE
-   ```
-
-2. Configure environment variables:
-
-    Create a `.env` file in the root directory with any necessary variables.
+***
 
 ## Usage
-### Starting the Server
 
-To start the server, run the following command: `npm start`
-
-## Routes
+### Routes
 - `/users` - User management routes (authentication, registration, etc.)
 - `/prescriptions` - CRUD operations for prescriptions
 - `/medications` - CRUD operations for doses
 - `/doses` - CRUD operations for doses
 
-### Sample Array of Medications List for Database
+#### Sample Array of Medications List for Database
 ```
 const painRelievers = [
   {
@@ -43,18 +55,13 @@ const painRelievers = [
 console.log(painRelievers);
 ```
 
-## Dependencies
-- mongodb: MongoDB Driver `npm install mongodb`
-
-- moment: Date and time manipulation `npm install moment`
-
-- notification API
-
-## Project Structure
+### Project Structure
 - `/controllers` - Route handlers
 - `/models` - Mongoose schema models
 - `/config` - Configuration files
 - `/routes` - API route definitions
+
+***
 
 # License 
 The source code for the site is licensed under the MIT license, which you can find in the MIT-LICENSE.txt file.

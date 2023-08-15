@@ -112,6 +112,6 @@ async function findMyPrescriptions() {
 // deleteNoMedication();
 // deleteAllPrescriptions();
 // deleteFakeUsers();
-// setAllNotTaken();
+setAllNotTaken();
 // setAllNotifiedFalse();
-findMyPrescriptions();
+// findMyPrescriptions();
