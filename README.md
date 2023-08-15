@@ -16,6 +16,17 @@ RxReMinder Backend provides authentication mechanisms to secure the API and ensu
 
     Create a `.env` file in the root directory with any necessary variables.
 
+### Dependencies
+- mongodb: MongoDB Driver `npm install mongodb`
+
+- moment: Date and time manipulation `npm install moment`
+
+- npm: `npm install`
+
+- Luxon `npm install luxon`
+
+- Courier API `npm install @trycourier/courier`
+
 ## Usage
 ### Starting the Server
 
@@ -43,12 +54,59 @@ const painRelievers = [
 console.log(painRelievers);
 ```
 
-## Dependencies
-- mongodb: MongoDB Driver `npm install mongodb`
+### Code Snip for Notifications 
+```
+const courier = CourierClient({ authorizationToken: process.env.COURIER_KEY });
 
-- moment: Date and time manipulation `npm install moment`
+async function sendNotifications() {
+    let doses = await Dose.find({ time: { $lt: new Date() }, taken: false, notified: false }).populate('user').populate('medication').sort({ time: 1 });
+    
+    console.log(doses.length);
 
-- notification API
+    for (let i = 0; i < doses.length; i++) {
+    // for (let i = 0; i < 5; i++) {
+        let dose = doses[i];
+        let email = dose.user.email;
+        let name = dose.user.firstName;
+        let medication = dose.medication.name;
+        let userOffset = dose.user.timezone;
+        let serverOffset = DateTime.local().offset / -60;
+        let myOffset = serverOffset - userOffset;
+        let time = DateTime.fromJSDate(dose.time).plus({ days: myOffset}).toFormat('h:mm a');
+        let date = DateTime.fromJSDate(dose.time).toFormat('ccc, LLL dd');
+
+        console.log(email, name, medication, time, date, userOffset, serverOffset, myOffset);
+       }
+      process.exit(0);
+    }
+}
+
+sendNotifications();
+```
+
+### Doses
+```
+async function randomlyTakeDoses() {
+    let doses = await Dose.find({ user: '64d47c661806b140baabaf0c'});
+    console.log(doses.length);
+
+    let oldDoses = doses.filter(dose => dose.time < new Date());
+    console.log(oldDoses.length);
+
+    
+    for (let i = 0; i < oldDoses.length; i++) {
+        const random = Math.random();
+        if (random > 0.5) {
+            oldDoses[i].taken = true;
+            await oldDoses[i].save();
+        }
+    }
+
+    for (let i = 0; i < oldDoses.length; i++) {
+        console.log(oldDoses[i].taken);
+    }
+}
+```
 
 ## Project Structure
 - `/controllers` - Route handlers
