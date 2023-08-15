@@ -16,13 +16,11 @@ router.get('/', (req, res) => {
     User.find({})
         .then((users) => {
             // console.log('users', users);
-            res.header("Access-Control-Allow-Origin", "*");
-            res.json({ users: users });
+            res.status(200).json({ users: users });
         })
         .catch((error) => {
             console.log('error', error);
-            res.header("Access-Control-Allow-Origin", "*");
-            res.json({ message: 'There was an issue, please try again...' });
+            res.status(500).json({ message: 'There was an issue, please try again...' });
         });
 });
 
@@ -31,55 +29,44 @@ router.get('/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            res.status(404).json({ message: 'User not found' });
+            res.status(404).json({ message: 'User not found.' });
         } else {
             res.status(200).json(user);
         }
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching user', error });
+        res.status(500).json({ message: 'Error fetching user.', error });
     }
 });
 
 
 // private
 router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
-    // console.log(req.body);
-    // console.log(req.user);
     const { id, firstName, lastName, email, username, birthdate, phoneNumber, prescriptions } = req.user; // object with user object inside
-    // birthdate = moment(birthdate).format('MMMM Do YYYY');
-    res.json({ id, firstName, lastName, email, username, birthdate, phoneNumber, prescriptions });
+    res.status(200).json({ id, firstName, lastName, email, username, birthdate, phoneNumber, prescriptions });
 });
 
-// other routes below
 // GET make a route that queries users by a field and value
 router.get('/:field/:value', (req, res) => {
     let field = req.params.field;
     let value = req.params.value;
-    // console.log('field', 'value', field, value);
 
     User.find({ [field]: [value] })
         .then((users) => {
-            // console.log("user", user);
-
             let birthdateParsedUsers = users.map(user => {
                 let parsedUser = { ...user._doc };
                 parsedUser.birthdate = moment(user.birthdate).format('YYYY-MM-DD');
-                // console.log(parsedUser);
                 return parsedUser;
             });
-            return res.json({ users: birthdateParsedUsers });
+            return res.status(200).json({ users: birthdateParsedUsers });
         })
         .catch(error => {
             console.log('error', error);
-            return res.json({ message: 'There was an issue please try again...' });
+            return res.status(500).json({ message: 'There was an issue please try again...' });
         });
 });
 
+// POST - adding the new user to the database
 router.post('/signup', (req, res) => {
-    // POST - adding the new user to the database
-    // console.log('===> Inside of /signup');
-    // console.log('===> /register -> req.body',req.body);
-
     User.findOne({ email: req.body.email })
         .then(user => {
             // if email already exists, a user will come back
@@ -117,7 +104,7 @@ router.post('/signup', (req, res) => {
                             })
                             .catch(err => {
                                 console.log('error with creating new user', err);
-                                res.json({ message: 'Error occured... Please try again.' });
+                                res.status(500).json({ message: 'Error occured... Please try again.' });
                             });
                     });
                 });
@@ -125,21 +112,17 @@ router.post('/signup', (req, res) => {
         })
         .catch(err => {
             console.log('Error finding user', err);
-            res.json({ message: 'Error occured... Please try again.' });
+            res.status(400).json({ message: 'Error occured... Please try again.' });
         });
 });
 
+// POST - finding a user and returning the user
 router.post('/login', async (req, res) => {
-    // POST - finding a user and returning the user
-    // console.log('===> Inside of /login');
-    // console.log('===> /login -> req.body', req.body);
-
     const foundUser = await User.findOne({ email: req.body.email });
 
     if (foundUser) {
         // user is in the DB
         let isMatch = await bcrypt.compareSync(req.body.password, foundUser.password);
-        // console.log('Does the passwords match?', isMatch);
         if (isMatch) {
             // if user match, then we want to send a JSON Web Token
             // Create a token payload
@@ -157,22 +140,21 @@ router.post('/login', async (req, res) => {
 
             jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
                 if (err) {
-                    res.status(400).json({ message: 'Session has endedd, please log in again' });
+                    res.status(400).json({ message: 'Session has endedd, please log in again.' });
                 }
                 const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
-                // console.log('===> legit', legit);
                 delete legit.password; // remove before showing response
                 res.json({ success: true, token: `Bearer ${token}`, userData: legit });
             });
-
         } else {
-            return res.status(400).json({ message: 'Email or Password is incorrect' });
+            return res.status(400).json({ message: 'Email or Password is incorrect.' });
         }
     } else {
         return res.status(400).json({ message: 'User not found' });
     }
 });
 
+// PUT route to update user
 router.put('/', passport.authenticate('jwt', { session: false }), (req, res) => {
     const updateQuery = {};
     // check firstName
@@ -198,11 +180,11 @@ router.put('/', passport.authenticate('jwt', { session: false }), (req, res) => 
 
     User.findByIdAndUpdate(req.user.id, { $set: updateQuery }, { new: true })
         .then((user) => {
-            return res.json({ message: `${user.email} was updated`, user: user });
+            return res.status(201).json({ message: `${user.email} was updated`, user: user });
         })
         .catch((error) => {
             console.log('error inside PUT /users/:id', error);
-            return res.json({ message: 'error occured, please try again.' });
+            return res.status(500).json({ message: 'Error occured, please try again.' });
         });
 });
 
@@ -212,11 +194,11 @@ router.delete('/', passport.authenticate('jwt', { session: false }), (req, res) 
 
     User.findByIdAndDelete(req.user.id)
         .then((result) => {
-            return res.json({ message: `user at ${req.user.id} was delete` });
+            return res.status(200).json({ message: `User at ${req.user.id} was deleted.` });
         })
         .catch((error) => {
             console.log('error inside DELETE /users/:id', error);
-            return res.json({ message: 'error occured, please try again.' });
+            return res.status(500).json({ message: 'Error occured, please try again.' });
         });
 });
 

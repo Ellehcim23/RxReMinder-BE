@@ -19,6 +19,7 @@ function createRandomUser() {
         birthdate: birthdate,
         password: password,
         phoneNumber: phoneNumber,
+        timezone: 5,
     }
 }
 

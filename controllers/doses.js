@@ -6,18 +6,13 @@ const passport = require('passport');
 // import the Dose model
 const { Dose } = require('../models');
 
-// middleware to protect all routes
-// router.use(passport.authenticate('jwt', { session: false }));
-
 // GET make a dose route to get all dose http://localhost:8000/doses
 router.get('/', async (req, res) => {
     try {
         const doses = await Dose.find();
-        // res.header("Access-Control-Allow-Origin", "*");
         res.status(200).json(doses);
     } catch (error) {
-        // res.header("Access-Control-Allow-Origin", "*");
-        res.json({ message: 'There was an issue, please try again...' });
+        res.status(500).json({ message: 'There was an issue, please try again...' });
     }
 });
 
@@ -28,13 +23,11 @@ router.get('/dailypercentage', passport.authenticate('jwt', { session: false }),
         
         const today = DateTime.local().startOf('day');
         const todaysDoses = doses.filter(dose => {
-            const parsedTime = DateTime.fromJSDate(dose.time).startOf('day');
-            // console.log(parsedTime.toISO(), today.toISO(), parsedTime.toISO() === today.toISO());            
+            const parsedTime = DateTime.fromJSDate(dose.time).startOf('day');          
             return parsedTime.toISO() === today.toISO();
         });
 
         if (todaysDoses.length === 0) {
-            // res.header("Access-Control-Allow-Origin", "*");
             // returns null if no doses for the day
             res.status(200).json(null);
         } else {
@@ -47,19 +40,15 @@ router.get('/dailypercentage', passport.authenticate('jwt', { session: false }),
                 }
             }
             const percentage = Math.round((taken / (taken + untaken)) * 100);
-
-            // res.header("Access-Control-Allow-Origin", "*");
             res.status(200).json(percentage);
         }
     } catch (error) {
-        // res.header("Access-Control-Allow-Origin", "*");
         res.status(400).json({ message: 'There was an issue, please try again...' });
     }
 });
 
 // GET user's percentage of doses taken for the past 7 days including today http://localhost:8000/doses/weeklypercentages
 router.get('/weeklypercentages', passport.authenticate('jwt', { session: false }), async (req, res) => {
-// router.get('/weeklypercentages', async (req, res) => {
     try {
         const doses = await Dose.find({ user: req.user.id });
 
@@ -71,8 +60,7 @@ router.get('/weeklypercentages', passport.authenticate('jwt', { session: false }
 
         for (let i = 0; i < dates.length; i++) {
             const todaysDoses = doses.filter(dose => {
-                const parsedTime = DateTime.fromJSDate(dose.time).startOf('day');
-                // console.log(parsedTime.toISO(), dates[i].toISO(), parsedTime.toISO() === dates[i].toISO());            
+                const parsedTime = DateTime.fromJSDate(dose.time).startOf('day');          
                 return parsedTime.toISO() === dates[i].toISO();
             });
 
@@ -95,8 +83,7 @@ router.get('/weeklypercentages', passport.authenticate('jwt', { session: false }
         }
         res.status(200).json(weeklypercentages);
     } catch (error) {
-        // res.header("Access-Control-Allow-Origin", "*");
-        res.json({ message: 'There was an issue, please try again...' });
+        res.status(500).json({ message: 'There was an issue, please try again...' });
     }
 });
 
@@ -107,15 +94,12 @@ router.get('/daydoses', passport.authenticate('jwt', { session: false }), async 
         
         const today = DateTime.local().startOf('day');
         const todaysDoses = doses.filter(dose => {
-            const parsedTime = DateTime.fromJSDate(dose.time).startOf('day');
-            // console.log(parsedTime.toISO(), today.toISO(), parsedTime.toISO() === today.toISO());            
+            const parsedTime = DateTime.fromJSDate(dose.time).startOf('day');           
             return parsedTime.toISO() === today.toISO();
         });
-        // res.header("Access-Control-Allow-Origin", "*");
         res.status(200).json(todaysDoses);
     } catch (error) {
-        // res.header("Access-Control-Allow-Origin", "*");
-        res.json({ message: 'There was an issue, please try again...' });
+        res.status(500).json({ message: 'There was an issue, please try again...' });
     }
 });
 
@@ -129,8 +113,6 @@ router.get('/month/:month/:year', passport.authenticate('jwt', { session: false 
         const monthDoses = doses.filter(dose => {
             const parsedMonth = DateTime.fromJSDate(dose.time).month;
             const parsedYear = DateTime.fromJSDate(dose.time).year;
-            // console.log(parsedMonth, month, parsedMonth === month);
-            // console.log(parsedYear, year, parsedYear === year);
             return (parsedMonth === month && parsedYear === year);
         });
         
@@ -138,7 +120,6 @@ router.get('/month/:month/:year', passport.authenticate('jwt', { session: false 
         for (let i = 1; i <= 31; i++) {
             // this conditional checks if the day is in the past
             if (month === DateTime.local().month && year === DateTime.local().year && i < DateTime.local().day) {
-                // console.log(i, DateTime.local().day);
                 days[i] = false;
             }
             else {
@@ -153,11 +134,9 @@ router.get('/month/:month/:year', passport.authenticate('jwt', { session: false 
                 days[i] = foundDose;
             }
         }
-        // res.header("Access-Control-Allow-Origin", "*");
         res.status(200).json(days);
     } catch (error) {
-        // res.header("Access-Control-Allow-Origin", "*");
-        res.json({ message: 'There was an issue, please try again...' });
+        res.status(500).json({ message: 'There was an issue, please try again...' });
     }
 });
 
@@ -193,11 +172,9 @@ router.post('/new', async (req, res) => {
 router.put('/taken/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
     try {
         const updatedDose = await Dose.findByIdAndUpdate(req.params.id, { taken: true }, { new: true });
-        // res.header("Access-Control-Allow-Origin", "*");
         res.status(200).json(updatedDose);
     } catch (error) {
-        // res.header("Access-Control-Allow-Origin", "*");
-        res.json({ message: 'There was an issue, please try again...' });
+        res.status(500).json({ message: 'There was an issue, please try again...' });
     }
 });
 
@@ -205,11 +182,9 @@ router.put('/taken/:id', passport.authenticate('jwt', { session: false }), async
 router.put('/:id', async (req, res) => {
     try {
         const updatedDose = await Dose.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        // res.header("Access-Control-Allow-Origin", "*");
         res.status(200).json(updatedDose);
     } catch (error) {
-        // res.header("Access-Control-Allow-Origin", "*");
-        res.json({ message: 'There was an issue, please try again...' });
+        res.status(500).json({ message: 'There was an issue, please try again...' });
     }
 });
 
@@ -217,11 +192,9 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const deletedDose = await Dose.findByIdAndDelete(req.params.id);
-        // res.header("Access-Control-Allow-Origin", "*");
         res.status(200).json({ message: 'Dose deleted successfully', dose: deletedDose });
     } catch (error) {
-        // res.header("Access-Control-Allow-Origin", "*");
-        res.json({ message: 'There was an issue, please try again...' });
+        res.status(500).json({ message: 'There was an issue, please try again...' });
     }
 });
 

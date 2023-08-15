@@ -1,8 +1,6 @@
 // get access to environment variables
 require('dotenv').config();
 const mongoose = require('mongoose');
-const { faker } = require('@faker-js/faker');
-const { createRandomUser } = require('./utils');
 
 // import our models
 const { User } = require('./models');
