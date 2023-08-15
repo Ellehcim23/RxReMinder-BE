@@ -1,5 +1,4 @@
 const { User, Prescription, Dose } = require('./models/');
-const { exists } = require('./models/user');
 
 async function randomlyTakeDoses() {
     let doses = await Dose.find({ user: '64d47c661806b140baabaf0c'});
@@ -76,9 +75,19 @@ async function setAllNotifiedFalse() {
     // process.exit(0);
 }
 
+async function setAllNotTaken() {
+    let doses = await Dose.find({ taken: true });
+    doses.forEach(async (dose, i) => {
+        dose.taken = false;
+        await dose.save();
+        console.log(i);
+    })
+}
+
 // randomlyTakeDoses();
 // deleteDoseless();
 // deleteNoMedication();
 // deleteAllPrescriptions();
 // deleteFakeUsers();
+// setAllNotTaken();
 setAllNotifiedFalse();
