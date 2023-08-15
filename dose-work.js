@@ -1,4 +1,5 @@
 const { User, Prescription, Dose } = require('./models/');
+const { find } = require('./models/user');
 
 async function randomlyTakeDoses() {
     let doses = await Dose.find({ user: '64d47c661806b140baabaf0c'});
@@ -84,10 +85,33 @@ async function setAllNotTaken() {
     })
 }
 
+async function findMyPrescriptions() {
+    let mikey = await User.findById('64d47c661806b140baabaf0c');
+    let validPrescriptions = [];
+
+    for (let i = 0; i < mikey.prescriptions.length; i++) {
+        let findPrescription = await Prescription.findById(mikey.prescriptions[i]);
+        if (findPrescription) {
+            validPrescriptions.push(findPrescription);
+        }
+    }
+
+    console.log(validPrescriptions.length);
+
+    mikey.prescriptions = [];
+    for (let i = 0; i < validPrescriptions.length; i++) {
+        mikey.prescriptions.push(validPrescriptions[i]);
+    }
+
+    let savedMikey = await mikey.save();
+    console.log(savedMikey.prescriptions);
+}
+
 // randomlyTakeDoses();
 // deleteDoseless();
 // deleteNoMedication();
 // deleteAllPrescriptions();
 // deleteFakeUsers();
 // setAllNotTaken();
-setAllNotifiedFalse();
+// setAllNotifiedFalse();
+findMyPrescriptions();
