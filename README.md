@@ -106,7 +106,8 @@ npm run dev
 
 ***
 
-# Code Snippets
+# Backend Code Snippets
+* See the README in the [Frontend Repo](https://github.com/kacyphan7/RxReMinder-FrontEnd) for frontend code snippets.
 
 ## Seeding Database with Medications
 ```
