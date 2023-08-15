@@ -87,6 +87,7 @@ router.post('/signup', (req, res) => {
                 // send a 400 response
                 return res.status(400).json({ message: 'Email already exists' });
             } else {
+                console.log(req.body.timezone);
                 // Create a new user
                 const newUser = new User({
                     firstName: req.body.firstName,
@@ -94,7 +95,8 @@ router.post('/signup', (req, res) => {
                     email: req.body.email,
                     birthdate: req.body.birthdate,
                     phoneNumber: req.body.phoneNumber,
-                    password: req.body.password
+                    password: req.body.password,
+                    timezone: req.body.timezone,
                 });
 
                 // Salt and hash the password - before saving the user

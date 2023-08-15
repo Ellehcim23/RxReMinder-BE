@@ -18,9 +18,10 @@ async function sendNotifications() {
         let medication = dose.medication.name;
         let time = DateTime.fromJSDate(dose.time).toFormat('h:mm a');
         let date = DateTime.fromJSDate(dose.time).toFormat('ccc, LLL dd');
-        let offset = DateTime.fromJSDate(dose.time).offset;
+        let userOffset = dose.user.timezone;
+        let serverOffset = DateTime.local().offset / -60;
 
-        console.log(email, name, medication, time, date, offset);
+        console.log(email, name, medication, time, date, userOffset, serverOffset);
 
         // const { requestId } = await courier.send({
         //     message: {
