@@ -11,7 +11,6 @@ async function sendNotifications() {
     console.log(doses.length);
 
     for (let i = 0; i < doses.length; i++) {
-    // for (let i = 0; i < 5; i++) {
         let dose = doses[i];
         let email = dose.user.email;
         let name = dose.user.firstName;
@@ -24,52 +23,37 @@ async function sendNotifications() {
 
         console.log(email, name, medication, time, date, userOffset, serverOffset, myOffset);
 
-        // const { requestId } = await courier.send({
-        //     message: {
-        //         to: {
-        //             email: email,
-        //         },
-        //         template: "SHMMXQBH9JMGYEQ8RA1M9TNTWFNN",
-        //         data: {
-        //             name: name,
-        //             medication: medication,
-        //             time: time,
-        //             date: date,
-        //         },
-        //     },
-        // });
+        const { requestId } = await courier.send({
+            message: {
+                to: {
+                    data: {
+                        name: name,
+                        medication: medication,
+                        time: time,
+                        date: date,
+                    },
+                    email: email,
+                },
+                content: {
+                    title: "RxReminder Notification",
+                    body: `Hi ${name}, it's ${time} on ${date}, time to take your ${medication}.\n\nhttps://rx-reminder.netlify.app`,
+                },
+                routing: {
+                    method: "single",
+                    channels: ["email"],
+                },
+            },
+        });
 
-        // const { requestId } = await courier.send({
-        //     message: {
-        //         to: {
-        //             data: {
-        //                 name: name,
-        //                 medication: medication,
-        //                 time: time,
-        //                 date: date,
-        //             },
-        //             email: email,
-        //         },
-        //         content: {
-        //             title: "RxReminder Notification",
-        //             body: `Hi ${name}, it's ${time} on ${date}, time to take your ${medication}.\n\nhttps://rx-reminder.netlify.app`,
-        //         },
-        //         routing: {
-        //             method: "single",
-        //             channels: ["email"],
-        //         },
-        //     },
-        // });
+        console.log(requestId);
 
-        // console.log(requestId);
-
-        // if(requestId) {
-        //     console.log('Notification sent successfully');
-        //     dose.notified = true;
-        //     await dose.save();
-        // } else {
-        //     console.log('Notification failed to send');
-        // }
+        if(requestId) {
+            console.log('Notification sent successfully');
+            dose.notified = true;
+            await dose.save();
+        } else {
+            console.log('Notification failed to send');
+        }
     }
     process.exit(0);
 }
