@@ -6,6 +6,11 @@
 
 RxReMinder Backend provides authentication mechanisms to secure the API and ensure that only authorized users can access certain routes. Currently, the API uses JSON Web Tokens (JWT) for authentication.
 
+## Deployment
+- Frontend deployed on [Netlify](https://rx-reminder.netlify.app/)
+- Backend deployed on [Heroku](https://rxreminder-5f38ebd3ad7c.herokuapp.com/)
+- Backend Github Repo [Github](https://github.com/Ellehcim23/RxReMinder-BE)
+
 ## Installation
 
 1. Clone the repository:
