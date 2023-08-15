@@ -1,4 +1,7 @@
-# RxReMinder 
+<p align="center">
+<img src="assets/logo2.png">
+</p>
+
 ## Authentication
 
 RxReMinder Backend provides authentication mechanisms to secure the API and ensure that only authorized users can access certain routes. Currently, the API uses JSON Web Tokens (JWT) for authentication.
