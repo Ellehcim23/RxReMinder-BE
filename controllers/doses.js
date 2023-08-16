@@ -52,10 +52,15 @@ router.get('/weeklypercentages', passport.authenticate('jwt', { session: false }
     try {
         const doses = await Dose.find({ user: req.user.id });
 
+        let userOffset = req.user.timezone;
+        let serverOffset = DateTime.local().offset / -60;
+        let myOffset = serverOffset - userOffset;
+        const today = DateTime.local().plus({ hours: myOffset }).startOf('day');
+
         const weeklypercentages = [];
         const dates = [];
         for (let i = 0; i < 7; i++) {
-            dates.unshift(DateTime.local().minus({ days: i }).startOf('day'));
+            dates.unshift(today.minus({ days: i }).startOf('day'));
         }
 
         for (let i = 0; i < dates.length; i++) {
@@ -92,7 +97,11 @@ router.get('/daydoses', passport.authenticate('jwt', { session: false }), async 
     try {
         const doses = await Dose.find({ user: req.user.id, taken: false }).sort({ time: 1 }).populate('medication').populate('prescription').populate('user');
         
-        const today = DateTime.local().startOf('day');
+        let userOffset = req.user.timezone;
+        let serverOffset = DateTime.local().offset / -60;
+        let myOffset = serverOffset - userOffset;
+        const today = DateTime.local().plus({ hours: myOffset }).startOf('day');
+        
         const todaysDoses = doses.filter(dose => {
             const parsedTime = DateTime.fromJSDate(dose.time).startOf('day');           
             return parsedTime.toISO() === today.toISO();
@@ -107,6 +116,11 @@ router.get('/month/:month/:year', passport.authenticate('jwt', { session: false 
     try {
         const doses = await Dose.find({ user: req.user.id, taken: false }).sort({ time: 1 });
         
+        let userOffset = req.user.timezone;
+        let serverOffset = DateTime.local().offset / -60;
+        let myOffset = serverOffset - userOffset;
+        const today = DateTime.local().plus({ hours: myOffset }).startOf('day');
+        
         const month = parseInt(req.params.month);
         const year = parseInt(req.params.year);
 
@@ -119,7 +133,7 @@ router.get('/month/:month/:year', passport.authenticate('jwt', { session: false 
         const days = {};
         for (let i = 1; i <= 31; i++) {
             // this conditional checks if the day is in the past
-            if (month === DateTime.local().month && year === DateTime.local().year && i < DateTime.local().day) {
+            if (month === today.month && year === today.year && i < today.day) {
                 days[i] = false;
             }
             else {
